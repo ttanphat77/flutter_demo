@@ -7,38 +7,38 @@ import 'package:image/image.dart' as im;
 import 'package:tflite/tflite.dart';
 import 'constants.dart';
 
-class AppBrain {
+class Classifier {
 
   Future loadModel() async {
     Tflite.close();
     try {
       await Tflite.loadModel(
-        model: "assets/converted_mnist_model.tflite",
-        labels: "assets/labels.txt",
+        model: "assets/neuralNumberModel/model.tflite",
+        labels: "assets/neuralNumberModel/label.txt",
       );
     } on PlatformException {
       print('Failed to load model.');
     }
   }
 
-  Future<List> processCanvasPoints(List<Offset> points) async {
+  Future<Future<List?>> processCanvasPoints(List<Offset?> points) async {
 
     // We create an empty canvas 280x280 pixels
-    final canvasSizeWithPadding = kCanvasSize + (2 * kCanvasInnerOffset);
-    final canvasOffset = Offset(kCanvasInnerOffset, kCanvasInnerOffset);
+    const canvasSizeWithPadding = kCanvasSize + (2 * kCanvasInnerOffset);
+    const canvasOffset = Offset(kCanvasInnerOffset, kCanvasInnerOffset);
     final recorder = PictureRecorder();
     final canvas = Canvas(
       recorder,
       Rect.fromPoints(
-        Offset(0.0, 0.0),
-        Offset(canvasSizeWithPadding, canvasSizeWithPadding),
+        const Offset(0.0, 0.0),
+        const Offset(canvasSizeWithPadding, canvasSizeWithPadding),
       ),
     );
 
     // Our image is expected to have a black background and a white drawing trace,
     // quite the opposite of the visual representation of our canvas on the screen
     canvas.drawRect(
-        Rect.fromLTWH(0, 0, canvasSizeWithPadding, canvasSizeWithPadding),
+        const Rect.fromLTWH(0, 0, canvasSizeWithPadding, canvasSizeWithPadding),
         kBackgroundPaint
     );
 
@@ -46,7 +46,7 @@ class AppBrain {
     for (int i = 0; i < points.length - 1; i++) {
       if (points[i] != null && points[i + 1] != null) {
         canvas.drawLine(
-            points[i] + canvasOffset, points[i + 1] + canvasOffset, kWhitePaint);
+            points[i]! + canvasOffset, points[i + 1]! + canvasOffset, kWhitePaint);
       }
     }
 
@@ -57,14 +57,14 @@ class AppBrain {
       canvasSizeWithPadding.toInt(),
     );
     final imgBytes = await img.toByteData(format: ImageByteFormat.png);
-    Uint8List pngUint8List = imgBytes.buffer.asUint8List();
+    Uint8List? pngUint8List = imgBytes?.buffer.asUint8List();
 
     // There's quite a funny game at this point. The image class we are using doesn't allow resizing.
     // In order to achieve that, we need to convert it to another image class that we are importing
     // as 'im' from package:image/image.dart
-    im.Image imImage = im.decodeImage(pngUint8List);
+    im.Image? imImage = im.decodeImage(pngUint8List!);
     im.Image resizedImage = im.copyResize(
-      imImage,
+      imImage!,
       width: kModelInputSize,
       height: kModelInputSize,
     );
@@ -74,7 +74,7 @@ class AppBrain {
     return predictImage(resizedImage);
   }
 
-  Future<List> predictImage(im.Image image) async {
+  Future<List?> predictImage(im.Image image) async {
     return await Tflite.runModelOnBinary(
       binary: imageToByteListFloat32(image, kModelInputSize),
     );
@@ -95,13 +95,4 @@ class AppBrain {
     }
     return convertedBytes.buffer.asUint8List();
   }
-
-  double convertPixel(int color) {
-    return (255 -
-        (((color >> 16) & 0xFF) * 0.299 +
-            ((color >> 8) & 0xFF) * 0.587 +
-            (color & 0xFF) * 0.114)) /
-        255.0;
-  }
-
 }

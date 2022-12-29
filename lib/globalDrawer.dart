@@ -35,9 +35,26 @@ class GlobalDrawer extends StatelessWidget {
               Navigator.pushNamed(context, '/neuralNumbers');
             },
           ),
-          const ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings'),
+          ListTile(
+            leading: const Icon(Icons.image),
+            title: const Text('Object Detector'),
+            onTap: () {
+              Navigator.pushNamed(context, '/objectDetector');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.pets),
+            title: const Text('Pokedex'),
+            onTap: () {
+              Navigator.pushNamed(context, '/pokedex');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('Settings'),
+            onTap: () {
+              Navigator.pushNamed(context, '/settings');
+            },
           ),
         ],
       ),
