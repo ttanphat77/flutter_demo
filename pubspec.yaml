@@ -52,6 +52,7 @@ dependencies:
   http: ^0.13.5
   carousel_slider: ^4.1.1
   flutter_chat_ui: ^1.6.6
+  graphql_flutter: ^5.1.2
 
 dev_dependencies:
   flutter_test:
